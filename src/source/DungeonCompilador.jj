@@ -1,0 +1,131 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(DungeonCompilador)
+package source;
+
+public class DungeonCompilador
+{
+  public static void main(String args []) throws ParseException
+  {
+    DungeonCompilador parser = new DungeonCompilador(System.in);
+    while (true)
+    {
+      System.out.println("Reading from standard input...");
+      System.out.print("Enter an expression like \"1+(2+3)*4;\" :");
+      try
+      {
+        switch (DungeonCompilador.one_line())
+        {
+          case 0 : 
+          System.out.println("OK.");
+          break;
+          case 1 : 
+          System.out.println("Goodbye.");
+          break;
+          default : 
+          break;
+        }
+      }
+      catch (Exception e)
+      {
+        System.out.println("NOK.");
+        System.out.println(e.getMessage());
+        DungeonCompilador.ReInit(System.in);
+      }
+      catch (Error e)
+      {
+        System.out.println("Oops.");
+        System.out.println(e.getMessage());
+        break;
+      }
+    }
+  }
+}
+
+PARSER_END(DungeonCompilador)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : /* OPERATORS */
+{
+  < INICIAPROG : "campanha" >
+| < ABREBLOCO : "mesa" >
+| < FECHABLOCO : "e_eh_aqui" >
+| < FIMINSTRUCAO: "tpk" >
+| < TIPOINT : "jogador" >
+| < TIPOFLOAT : "npc" >
+| < TIPOBOL : "arma" >
+| < TIPOCHAR : "armadura" >
+}
+
+
+TOKEN : /* CONDITIONALS */
+{
+  < IF : "rola_um_dado_ai" >
+| < ABREPAR : "(" >
+| < FECHAPAR : ")" >
+| < OPREL : "==" | "!=" | "<" | ">" | "<=" | ">=" >
+| < OPBOOL : "&&" | "||" >
+}
+
+TOKEN : /* ASSIGNMENT */
+{
+  < ASSIGN : "=" >
+}
+
+TOKEN : /* LOOP */
+{
+  < WHILE : "iniciativa" >
+| < DO : "sua_vez" >
+| < DOWHILE : "vez_do_monstro" >
+}
+
+TOKEN : /* ARITHMETIC OPERATORS */
+{
+  < OPAD : "+" | "-" >
+| < OPMULT : "*" | "/" >
+}
+
+TOKEN :
+{
+  < LETRA : ["a"-"z"] >
+| < DIGITO : [ "0"-"9" ] >
+|   < IDENTIFICADOR : < LETRA >(< LETRA > | < DIGITO >)* >
+}
+
+
+void main():
+{}
+{
+  < INICIAPROG > <IDENTIFICADOR >
+  
+  < ABREBLOCO >
+
+  	(declaraVariavel())*
+
+  < FECHABLOCO >
+}
+
+void declaraVariavel(): {}
+{
+   	tipoDado() < IDENTIFICADOR > 
+}
+
+void tipoDado() :
+{}
+
+{
+  (< TIPOINT > | < TIPOCHAR > | < TIPOBOL > | < TIPOFLOAT >)
+}
