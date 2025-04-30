@@ -8,31 +8,20 @@ public class DungeonCompilador implements DungeonCompiladorConstants {
     DungeonCompilador parser = new DungeonCompilador(System.in);
     while (true)
     {
-      System.out.println("Reading from standard input...");
-      System.out.print("Enter an expression like \"1+(2+3)*4;\" :");
+      System.out.println("Iniciando uma nova hist\u00f3ria");
       try
       {
-        switch (DungeonCompilador.one_line())
-        {
-          case 0 :
-          System.out.println("OK.");
-          break;
-          case 1 :
-          System.out.println("Goodbye.");
-          break;
-          default :
-          break;
-        }
+        DungeonCompilador.main();
       }
       catch (Exception e)
       {
-        System.out.println("NOK.");
+        System.out.println("Voce n\u00e3o consegue atacar");
         System.out.println(e.getMessage());
         DungeonCompilador.ReInit(System.in);
       }
       catch (Error e)
       {
-        System.out.println("Oops.");
+        System.out.println("Voce toma dano");
         System.out.println(e.getMessage());
         break;
       }

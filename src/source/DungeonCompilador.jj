@@ -16,31 +16,20 @@ public class DungeonCompilador
     DungeonCompilador parser = new DungeonCompilador(System.in);
     while (true)
     {
-      System.out.println("Reading from standard input...");
-      System.out.print("Enter an expression like \"1+(2+3)*4;\" :");
+      System.out.println("Iniciando uma nova história");
       try
       {
-        switch (DungeonCompilador.one_line())
-        {
-          case 0 : 
-          System.out.println("OK.");
-          break;
-          case 1 : 
-          System.out.println("Goodbye.");
-          break;
-          default : 
-          break;
-        }
+        DungeonCompilador.main();
       }
       catch (Exception e)
       {
-        System.out.println("NOK.");
+        System.out.println("Voce não consegue atacar");
         System.out.println(e.getMessage());
         DungeonCompilador.ReInit(System.in);
       }
       catch (Error e)
       {
-        System.out.println("Oops.");
+        System.out.println("Voce toma dano");
         System.out.println(e.getMessage());
         break;
       }
@@ -64,10 +53,10 @@ TOKEN : /* OPERATORS */
 | < ABREBLOCO : "mesa" >
 | < FECHABLOCO : "e_eh_aqui" >
 | < FIMINSTRUCAO: "tpk" >
-| < TIPOINT : "jogador" >
-| < TIPOFLOAT : "npc" >
-| < TIPOBOL : "arma" >
-| < TIPOCHAR : "armadura" >
+| < TIPOINT : "forca" >
+| < TIPOFLOAT : "destreza" >
+| < TIPOBOL : "inteligencia" >
+| < TIPOCHAR : "sabedoria" >
 }
 
 
