@@ -1,120 +1,191 @@
 /**
- * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ * Compilador D&D – versão base
+ * Requisitos mínimos: declaração, atribuição, if/else, while, do-until,
+ * três tipos, dois laços, controle de erros em PT-BR.
  */
-options
-{
-  static = true;
+
+options {
+  STATIC = true;
+  LOOKAHEAD = 2;          // garante parsing LL(k) simples
 }
 
 PARSER_BEGIN(DungeonCompilador)
 package source;
 
-public class DungeonCompilador
-{
-  public static void main(String args []) throws ParseException
-  {
-    DungeonCompilador parser = new DungeonCompilador(System.in);
-    while (true)
-    {
-      System.out.println("Iniciando uma nova história");
-      try
-      {
-        DungeonCompilador.main();
-      }
-      catch (Exception e)
-      {
-        System.out.println("Voce não consegue atacar");
-        System.out.println(e.getMessage());
-        DungeonCompilador.ReInit(System.in);
-      }
-      catch (Error e)
-      {
-        System.out.println("Voce toma dano");
-        System.out.println(e.getMessage());
-        break;
-      }
+public class DungeonCompilador {
+  public static void main(String[] args) {
+    try {
+      DungeonCompilador p = new DungeonCompilador(System.in);
+      p.programa();                     // 1 compilação
+      System.out.println("Iniciando uma nova história!");
+    } catch (ParseException e) {
+      System.err.println("Você toma dano!");
     }
   }
 }
-
 PARSER_END(DungeonCompilador)
 
-SKIP :
-{
-  " "
-| "\r"
-| "\t"
-| "\n"
-}
+/* ------------------------------------------------------------------ */
+/*  LÉXICO                                                             */
+/* ------------------------------------------------------------------ */
 
-TOKEN : /* OPERATORS */
-{
-  < INICIAPROG : "campanha" >
-| < ABREBLOCO : "mesa" >
-| < FECHABLOCO : "e_eh_aqui" >
-| < FIMINSTRUCAO: "tpk" >
-| < TIPOINT : "forca" >
-| < TIPOFLOAT : "destreza" >
-| < TIPOBOL : "inteligencia" >
-| < TIPOCHAR : "sabedoria" >
-}
+SKIP : { " " | "\t" | "\r" | "\n" }
 
-
-TOKEN : /* CONDITIONALS */
-{
-  < IF : "rola_um_dado_ai" >
-| < ABREPAR : "(" >
-| < FECHAPAR : ")" >
-| < OPREL : "==" | "!=" | "<" | ">" | "<=" | ">=" >
-| < OPBOOL : "&&" | "||" >
-}
-
-TOKEN : /* ASSIGNMENT */
-{
-  < ASSIGN : "=" >
-}
-
-TOKEN : /* LOOP */
-{
-  < WHILE : "iniciativa" >
-| < DO : "sua_vez" >
-| < DOWHILE : "vez_do_monstro" >
-}
-
-TOKEN : /* ARITHMETIC OPERATORS */
-{
-  < OPAD : "+" | "-" >
-| < OPMULT : "*" | "/" >
-}
-
+/* --- Palavras-chave & símbolos --- */
 TOKEN :
 {
-  < LETRA : ["a"-"z"] >
-| < DIGITO : [ "0"-"9" ] >
-|   < IDENTIFICADOR : < LETRA >(< LETRA > | < DIGITO >)* >
+      < INICIAPROG   : "campanha" >
+  |   < ABREBLOCO    : "mesa" >
+  |   < FECHABLOCO   : "e_eh_aqui" >
+  |   < FIMINST      : "fim_de_turno" >
+
+  |   < IF           : "rola_um_dado_ai" >
+  |   < THEN         : "acerta" >
+  |   < ELSE         : "erra" >
+  |   < END          : "long_rest" >
+
+  |   < WHILE        : "iniciativa" >
+  |   < DO           : "sua_vez" >
+  |   < UNTIL        : "vez_do_monstro" >
+
+  /* tipos */
+  |   < TIPOINT      : "forca" >
+  |   < TIPOFLOAT    : "destreza" >
+  |   < TIPOBOL      : "inteligencia" >
+  |   < TIPOCHAR     : "sabedoria" >
+
+  /* operadores */
+  |   < ASSIGN       : "recebe" >
+  |   < PLUS         : "buff" >  |   < MINUS  : "debuff" >
+  |   < TIMES        : "crit" >  |   < DIV    : "partilha" >
+
+  |   < EQ : "==" > | < NE : "!=" > | < GT : ">" > | < GE : ">=" >
+  |   < LT : "<" >  | < LE : "<=" >
+
+  |   < ANDBOOL : "&&" > | < ORBOOL : "||" > | < NOTBOOL : "!" >
+
+  /* literais e identificadores */
+  |   < INT_LIT   : (["0"-"9"])+ >
+  |   < FLOAT_LIT : (["0"-"9"])+ "." (["0"-"9"])+ >
+  |   < BOOL_LIT  : "verdadeiro" | "falso" >
+  |   < CHAR_LIT  : "'" ~["'"] "'" >
+
+  |   <IDENT   : <LETTER> (<LETTER> | <DIGIT>)* >
+  |   <#LETTER : ["a"-"z","A"-"Z","_"] >
+  |   <#DIGIT  : ["0"-"9"] >
 }
 
+/* ------------------------------------------------------------------ */
+/*  SINTAXE (LL)                                                      */
+/* ------------------------------------------------------------------ */
 
-void main():
+/* programa : campanha id mesa bloco e_eh_aqui fim_de_turno EOF */
+void programa() :
 {}
 {
-  < INICIAPROG > <IDENTIFICADOR >
-  
-  < ABREBLOCO >
-
-  	(declaraVariavel())*
-
-  < FECHABLOCO >
+  <INICIAPROG> <IDENT> <ABREBLOCO>
+      bloco()
+  <FECHABLOCO> <FIMINST> <EOF>
 }
 
-void declaraVariavel(): {}
-{
-   	tipoDado() < IDENTIFICADOR > 
-}
-
-void tipoDado() :
+/* bloco : {decl | cmd}* */
+void bloco() :
 {}
-
 {
-  (< TIPOINT > | < TIPOCHAR > | < TIPOBOL > | < TIPOFLOAT >)
+  ( declaracao() | comando() )*
+}
+
+/* decl : tipo id [= expr] fim_de_turno */
+void declaracao() :
+{}
+{
+  tipo() <IDENT> ( <ASSIGN> expressao() )? <FIMINST>
+}
+
+/* tipo : forca | destreza | inteligencia | sabedoria */
+void tipo() :
+{}
+{
+  <TIPOINT> | <TIPOFLOAT> | <TIPOBOL> | <TIPOCHAR>
+}
+
+/* ---------------- COMANDOS ---------------- */
+void comando() :
+{}
+{
+    atribuicao()
+  | condicional()
+  | lacoWhile()
+  | lacoDoUntil()
+}
+
+/* atrib : id = expr fim_de_turno */
+void atribuicao() :
+{}
+{
+  <IDENT> <ASSIGN> expressao() <FIMINST>
+}
+
+/* if : if (expr) entao bloco [se_nao bloco] fim */
+void condicional() :
+{}
+{
+  <IF> expressao() <THEN> bloco() ( <ELSE> bloco() )? <END>
+}
+
+/* while : iniciativa (expr) sua_vez bloco fim */
+void lacoWhile() :
+{}
+{
+  <WHILE> expressao() <DO> bloco() <END>
+}
+
+/* do-until : sua_vez bloco vez_do_monstro (expr) fim_de_turno   */
+void lacoDoUntil() :
+{}
+{
+  <DO> bloco() <UNTIL> expressao() <FIMINST>
+}
+
+/* ---------------- EXPRESSÕES ---------------- */
+
+/* expr lógico OR */
+void expressao() : {} { 
+  expAND() ( <ORBOOL> expAND() )*
+}
+
+/* expr lógico AND */
+void expAND() : {} {
+  expRel() ( <ANDBOOL> expRel() )*
+}
+
+/* expr relacional */
+void expRel() : {} {
+  expAditiva() ( (<EQ>|<NE>|<GT>|<GE>|<LT>|<LE>) expAditiva() )?
+}
+
+/* + / - */
+void expAditiva() : {} {
+  expMult() ( (<PLUS>|<MINUS>) expMult() )*
+}
+
+/* * / */
+void expMult() : {} {
+  fator() ( (<TIMES>|<DIV>) fator() )*
+}
+
+/* fator */
+void fator() : {} {
+      <IDENT>
+    | literal()
+    | <NOTBOOL> fator()
+    | "(" expressao() ")"
+}
+
+/* literais */
+void literal() : {} {
+      <INT_LIT>
+    | <FLOAT_LIT>
+    | <BOOL_LIT>
+    | <CHAR_LIT>
 }
