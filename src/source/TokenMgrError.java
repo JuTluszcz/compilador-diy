@@ -3,6 +3,7 @@
 package source;
 
 /** Token Manager Error. */
+@SuppressWarnings("all") 
 public class TokenMgrError extends Error
 {
 
@@ -103,10 +104,10 @@ public class TokenMgrError extends Error
    * Note: You can customize the lexical error message by modifying this method.
    */
   protected static String LexicalErr(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar) {
-    return("Lexical error at line " + //
-          errorLine + ", column " + //
-          errorColumn + ".  Encountered: " + //
-          (EOFSeen ? "<EOF>" : ("'" + addEscapes(String.valueOf(curChar)) + "' (" + curChar + "),")) + //
+    return("Por causa disso sua cagada pode ser vista na linha " + //
+          errorLine + ", com a coluna " + //
+          errorColumn + " proxima a vendinha de peixes. E tudo isso por causa do(a) maldito(a): " + //
+          (EOFSeen ? "<EOF>" : ("'" + addEscapes(String.valueOf((char) curChar)) + "' (" + curChar + "),")) + //
           (errorAfter == null || errorAfter.length() == 0 ? "" : " after prefix \"" + addEscapes(errorAfter) + "\"")) + //
           (lexState == 0 ? "" : " (in lexical state " + lexState + ")");
   }
@@ -144,4 +145,4 @@ public class TokenMgrError extends Error
     this(LexicalErr(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
   }
 }
-/* JavaCC - OriginalChecksum=63d95df4b7680e20b6c7546a66d97dc5 (do not edit this line) */
+/* JavaCC - OriginalChecksum=4329c84925f3fd1ae4e98801669b12c9 (do not edit this line) */
