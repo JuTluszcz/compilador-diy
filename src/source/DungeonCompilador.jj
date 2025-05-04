@@ -16,22 +16,22 @@ public class DungeonCompilador
     DungeonCompilador parser = new DungeonCompilador(System.in);
     while (true)
     {
-      System.out.println("Iniciando uma nova história");
+      System.out.println("Iniciando uma nova historia");
       try
       {
         DungeonCompilador.main();
       }
-      catch (Exception e)
+      catch (ParseException e)
       {
-        System.out.println("Voce não consegue atacar");
+        System.out.println("Voce falha no teste sintatico.");
         System.out.println(e.getMessage());
         DungeonCompilador.ReInit(System.in);
       }
-      catch (Error e)
+      catch (TokenMgrError e)
       {
-        System.out.println("Voce toma dano");
+        System.out.println("Voce falha no teste lexico.");
         System.out.println(e.getMessage());
-        break;
+        DungeonCompilador.ReInit(System.in);
       }
     }
   }
@@ -91,14 +91,13 @@ TOKEN :
 {
   < LETRA : ["a"-"z"] >
 | < DIGITO : [ "0"-"9" ] >
-|   < IDENTIFICADOR : < LETRA >(< LETRA > | < DIGITO >)* >
+| < IDENTIFICADOR : < LETRA >(< LETRA > | < DIGITO >)* >
 }
 
 
-void main():
-{}
+void main() : {}
 {
-  < INICIAPROG > <IDENTIFICADOR >
+  < INICIAPROG > < IDENTIFICADOR >
   
   < ABREBLOCO >
 
@@ -107,14 +106,27 @@ void main():
   < FECHABLOCO >
 }
 
-void declaraVariavel(): {}
+void declaraVariavel() : {}
 {
-   	tipoDado() < IDENTIFICADOR > 
+  tipoDado() listaDeclaracoes()
 }
 
-void tipoDado() :
-{}
+void listaDeclaracoes() : {}
+{
+  declaracao() ( "," declaracao() )*
+}
 
+void declaracao() : {}
+{
+  <IDENTIFICADOR> ( "=" expressao() )?
+}
+
+void expressao() : {}
+{
+  <IDENTIFICADOR> | ( <DIGITO> )+
+}
+
+void tipoDado() : {}
 {
   (< TIPOINT > | < TIPOCHAR > | < TIPOBOL > | < TIPOFLOAT >)
 }
