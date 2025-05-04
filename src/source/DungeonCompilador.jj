@@ -54,7 +54,6 @@ TOKEN : /* OPERATORS */
 | < FECHABLOCO : "e_eh_aqui" >
 | < FIMINSTRUCAO: "tpk" >
 | < TIPOINT : "forca" >
-| < TIPOFLOAT : "destreza" >
 | < TIPOBOL : "inteligencia" >
 | < TIPOCHAR : "sabedoria" >
 }
@@ -97,13 +96,29 @@ TOKEN :
 
 void main() : {}
 {
-  < INICIAPROG > < IDENTIFICADOR >
-  
-  < ABREBLOCO >
+  < INICIAPROG > < IDENTIFICADOR > bloco()
+}
 
-  	(declaraVariavel())*
+void bloco() : {}
+{
+  <ABREBLOCO>
+    (declaraVariavel() | condicional() | lacoWhile() | lacoDoWhile())*
+  <FECHABLOCO>
+}
 
-  < FECHABLOCO >
+void condicional() : {}
+{
+  <IF> <ABREPAR> expressao() <FECHAPAR> bloco()
+}
+
+void lacoWhile() : {}
+{
+  <WHILE> <ABREPAR> expressao() <FECHAPAR> bloco()
+}
+
+void lacoDoWhile() : {}
+{
+  <DO> bloco() <DOWHILE> <ABREPAR> expressao() <FECHAPAR>
 }
 
 void declaraVariavel() : {}
@@ -128,5 +143,5 @@ void expressao() : {}
 
 void tipoDado() : {}
 {
-  (< TIPOINT > | < TIPOCHAR > | < TIPOBOL > | < TIPOFLOAT >)
+  (< TIPOINT > | < TIPOCHAR > | < TIPOBOL >)
 }
