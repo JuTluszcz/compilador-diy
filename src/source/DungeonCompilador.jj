@@ -101,16 +101,24 @@ void programa() :
 void bloco() :
 {}
 {
-  ( declaracao() | comando() )*
+  ( declaraVariavel() | comando() )*
 }
 
-/* decl : tipo id [= expr] fim_de_turno */
-void declaracao() :
-{}
-{
-  tipo() <IDENT> ( <ASSIGN> expressao() )? <FIMINST>
-}
+void declaraVariavel() : {}
+ {
+   tipo() listaDeclaracoes() <FIMINST>
+ }
+ 
+ void listaDeclaracoes() : {}
+ {
+   declaracao() ( "," declaracao() )*
+ }
 
+ void declaracao() : {}
+ {
+   <IDENT> ( <ASSIGN> expressao() )?
+ }
+ 
 /* tipo : forca | destreza | inteligencia | sabedoria */
 void tipo() :
 {}

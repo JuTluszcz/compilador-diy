@@ -3,12 +3,13 @@ mesa
     iniciativa ( voce partilha uma_racao_de_comidinha ) sua_vez
         rola_um_dado_ai rolagem crit vivaaaaaaa acerta
             sabedoria o_aluno recebe bastante fim_de_turno
+            forca a_aluna fim_de_turno
         erra
-            inteligencia o_aluno recebe pouco fim_de_turno
+            inteligencia o_aluno, o_aluna, a_aluno recebe pouco fim_de_turno
     long_rest
     sua_vez
         forca mentira recebe nao_e_nao fim_de_turno
     vez_do_monstro ( ele_se buff muitao_roubado_de_plus ) fim_de_turno
-long_rest
+    long_rest
 e_eh_aqui
 fim_de_turno
