@@ -108,7 +108,7 @@ public class ParseException extends Exception {
       // }
       expected.append(EOL).append("    ");
     }
-    String retval = "Nem rolando um 20 voce conseguiria, visto o(a)";
+    String retval = "Nem rolando um 20 voce conseguiria. Visto o(a)";
     Token tok = currentToken.next;
     for (int i = 0; i < maxSize; i++) {
       if (i != 0) retval += " ";
@@ -124,7 +124,7 @@ public class ParseException extends Exception {
     if (currentToken.next != null) {
       retval += "\" na linha " + currentToken.next.beginLine + ", com a coluna " + currentToken.next.beginColumn;
     }
-    retval += "?" + EOL;
+    retval += "? Pois e, nao deveria estar ali." + EOL;
     
     
     if (expectedTokenSequences.length == 0) {

@@ -107,7 +107,7 @@ public class TokenMgrError extends Error
     return("Por causa disso sua cagada pode ser vista na linha " + //
           errorLine + ", com a coluna " + //
           errorColumn + " proxima a vendinha de peixes. E tudo isso por causa do(a) maldito(a): " + //
-          (EOFSeen ? "<EOF>" : ("'" + addEscapes(String.valueOf((char) curChar)) + "' (" + curChar + "),")) + //
+          (EOFSeen ? "<EOF>" : ("'" + addEscapes(String.valueOf((char) curChar)) + "' (" + curChar + ").")) + //
           (errorAfter == null || errorAfter.length() == 0 ? "" : " after prefix \"" + addEscapes(errorAfter) + "\"")) + //
           (lexState == 0 ? "" : " (in lexical state " + lexState + ")");
   }

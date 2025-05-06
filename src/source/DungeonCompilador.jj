@@ -12,41 +12,22 @@ options {
 PARSER_BEGIN(DungeonCompilador)
 package source;
 
-<<<<<<< Updated upstream
-public class DungeonCompilador
-{
-  public static void main(String args []) throws ParseException
-  {
-    DungeonCompilador parser = new DungeonCompilador(System.in);
-    while (true)
-    {
-      System.out.println("Iniciando uma nova historia");
-      try
-      {
-        DungeonCompilador.main();
-      }
-      catch (ParseException e)
-      {
-        System.out.println("Voce falha no teste sintatico.");
-        System.out.println(e.getMessage());
-        DungeonCompilador.ReInit(System.in);
-      }
-      catch (TokenMgrError e)
-      {
-        System.out.println("Voce falha no teste lexico.");
-        System.out.println(e.getMessage());
-        DungeonCompilador.ReInit(System.in);
-      }
-=======
 public class DungeonCompilador {
   public static void main(String[] args) {
     try {
+      System.out.println("Iniciando uma nova historia!");
       DungeonCompilador p = new DungeonCompilador(System.in);
       p.programa();                     // 1 compilação
-      System.out.println("Iniciando uma nova história!");
-    } catch (ParseException e) {
-      System.err.println("Você toma dano!");
->>>>>>> Stashed changes
+    } 
+    catch (ParseException e)
+    {
+      System.out.println("Voce falha no teste sintatico.");
+      System.out.println(e.getMessage());
+    }
+    catch (TokenMgrError e)
+    {
+      System.out.println("Voce falha no teste lexico.");
+      System.out.println(e.getMessage());
     }
   }
 }
@@ -56,57 +37,11 @@ PARSER_END(DungeonCompilador)
 /*  LÉXICO                                                             */
 /* ------------------------------------------------------------------ */
 
-<<<<<<< Updated upstream
-TOKEN : /* OPERATORS */
-{
-  < INICIAPROG : "campanha" >
-| < ABREBLOCO : "mesa" >
-| < FECHABLOCO : "e_eh_aqui" >
-| < FIMINSTRUCAO: "tpk" >
-| < TIPOINT : "forca" >
-| < TIPOBOL : "inteligencia" >
-| < TIPOCHAR : "sabedoria" >
-}
-
-
-TOKEN : /* CONDITIONALS */
-{
-  < IF : "rola_um_dado_ai" >
-| < ABREPAR : "(" >
-| < FECHAPAR : ")" >
-| < OPREL : "==" | "!=" | "<" | ">" | "<=" | ">=" >
-| < OPBOOL : "&&" | "||" >
-}
-
-TOKEN : /* ASSIGNMENT */
-{
-  < ASSIGN : "=" >
-}
-
-TOKEN : /* LOOP */
-{
-  < WHILE : "iniciativa" >
-| < DO : "sua_vez" >
-| < DOWHILE : "vez_do_monstro" >
-}
-
-TOKEN : /* ARITHMETIC OPERATORS */
-{
-  < OPAD : "+" | "-" >
-| < OPMULT : "*" | "/" >
-}
-=======
 SKIP : { " " | "\t" | "\r" | "\n" }
->>>>>>> Stashed changes
 
 /* --- Palavras-chave & símbolos --- */
 TOKEN :
 {
-<<<<<<< Updated upstream
-  < LETRA : ["a"-"z"] >
-| < DIGITO : [ "0"-"9" ] >
-| < IDENTIFICADOR : < LETRA >(< LETRA > | < DIGITO >)* >
-=======
       < INICIAPROG   : "campanha" >
   |   < ABREBLOCO    : "mesa" >
   |   < FECHABLOCO   : "e_eh_aqui" >
@@ -146,30 +81,12 @@ TOKEN :
   |   <IDENT   : <LETTER> (<LETTER> | <DIGIT>)* >
   |   <#LETTER : ["a"-"z","A"-"Z","_"] >
   |   <#DIGIT  : ["0"-"9"] >
->>>>>>> Stashed changes
 }
 
 /* ------------------------------------------------------------------ */
 /*  SINTAXE (LL)                                                      */
 /* ------------------------------------------------------------------ */
 
-<<<<<<< Updated upstream
-void main() : {}
-{
-  < INICIAPROG > < IDENTIFICADOR > bloco()
-}
-
-void bloco() : {}
-{
-  <ABREBLOCO>
-    (declaraVariavel() | condicional() | lacoWhile() | lacoDoWhile())*
-  <FECHABLOCO>
-}
-
-void condicional() : {}
-{
-  <IF> <ABREPAR> expressao() <FECHAPAR> bloco()
-=======
 /* programa : campanha id mesa bloco e_eh_aqui fim_de_turno EOF */
 void programa() :
 {}
@@ -279,45 +196,4 @@ void literal() : {} {
     | <FLOAT_LIT>
     | <BOOL_LIT>
     | <CHAR_LIT>
->>>>>>> Stashed changes
-}
-
-void lacoWhile() : {}
-{
-  <WHILE> <ABREPAR> expressao() <FECHAPAR> bloco()
-}
-
-void lacoDoWhile() : {}
-{
-  <DO> bloco() <DOWHILE> <ABREPAR> expressao() <FECHAPAR>
-}
-
-void declaraVariavel() : {}
-{
-  tipoDado() listaDeclaracoes()
-}
-
-void listaDeclaracoes() : {}
-{
-  declaracao() ( "," declaracao() )*
-}
-
-void declaracao() : {}
-{
-  <IDENTIFICADOR> ( "=" expressao() )?
-}
-
-void expressao() : {}
-{
-  termo() ( <OPREL> termo() )?
-}
-
-void termo() : {}
-{
-  <IDENTIFICADOR> | ( <DIGITO> )+
-}
-
-void tipoDado() : {}
-{
-  (< TIPOINT > | < TIPOCHAR > | < TIPOBOL >)
 }
