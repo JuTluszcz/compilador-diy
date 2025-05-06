@@ -93,7 +93,8 @@ void programa() :
 {
   <INICIAPROG> <IDENT> <ABREBLOCO>
       bloco()
-  <FECHABLOCO> <FIMINST> <EOF>
+  <FECHABLOCO> <FIMINST> 
+  //<EOF>
 }
 
 /* bloco : {decl | cmd}* */
