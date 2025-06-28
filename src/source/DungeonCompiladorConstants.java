@@ -17,43 +17,71 @@ public interface DungeonCompiladorConstants {
   /** RegularExpression Id. */
   int FECHABLOCO = 7;
   /** RegularExpression Id. */
-  int FIMINSTRUCAO = 8;
+  int FIMINST = 8;
   /** RegularExpression Id. */
-  int TIPOINT = 9;
+  int IF = 9;
   /** RegularExpression Id. */
-  int TIPOFLOAT = 10;
+  int THEN = 10;
   /** RegularExpression Id. */
-  int TIPOBOL = 11;
+  int ELSE = 11;
   /** RegularExpression Id. */
-  int TIPOCHAR = 12;
+  int END = 12;
   /** RegularExpression Id. */
-  int IF = 13;
+  int WHILE = 13;
   /** RegularExpression Id. */
-  int ABREPAR = 14;
+  int DO = 14;
   /** RegularExpression Id. */
-  int FECHAPAR = 15;
+  int UNTIL = 15;
   /** RegularExpression Id. */
-  int OPREL = 16;
+  int TIPOINT = 16;
   /** RegularExpression Id. */
-  int OPBOOL = 17;
+  int TIPOFLOAT = 17;
   /** RegularExpression Id. */
-  int ASSIGN = 18;
+  int TIPOBOL = 18;
   /** RegularExpression Id. */
-  int WHILE = 19;
+  int TIPOCHAR = 19;
   /** RegularExpression Id. */
-  int DO = 20;
+  int ASSIGN = 20;
   /** RegularExpression Id. */
-  int DOWHILE = 21;
+  int PLUS = 21;
   /** RegularExpression Id. */
-  int OPAD = 22;
+  int MINUS = 22;
   /** RegularExpression Id. */
-  int OPMULT = 23;
+  int TIMES = 23;
   /** RegularExpression Id. */
-  int LETRA = 24;
+  int DIV = 24;
   /** RegularExpression Id. */
-  int DIGITO = 25;
+  int EQ = 25;
   /** RegularExpression Id. */
-  int IDENTIFICADOR = 26;
+  int NE = 26;
+  /** RegularExpression Id. */
+  int GT = 27;
+  /** RegularExpression Id. */
+  int GE = 28;
+  /** RegularExpression Id. */
+  int LT = 29;
+  /** RegularExpression Id. */
+  int LE = 30;
+  /** RegularExpression Id. */
+  int ANDBOOL = 31;
+  /** RegularExpression Id. */
+  int ORBOOL = 32;
+  /** RegularExpression Id. */
+  int NOTBOOL = 33;
+  /** RegularExpression Id. */
+  int INT_LIT = 34;
+  /** RegularExpression Id. */
+  int FLOAT_LIT = 35;
+  /** RegularExpression Id. */
+  int BOOL_LIT = 36;
+  /** RegularExpression Id. */
+  int CHAR_LIT = 37;
+  /** RegularExpression Id. */
+  int IDENT = 38;
+  /** RegularExpression Id. */
+  int LETTER = 39;
+  /** RegularExpression Id. */
+  int DIGIT = 40;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -62,31 +90,48 @@ public interface DungeonCompiladorConstants {
   String[] tokenImage = {
     "<EOF>",
     "\" \"",
-    "\"\\r\"",
     "\"\\t\"",
+    "\"\\r\"",
     "\"\\n\"",
     "\"campanha\"",
     "\"mesa\"",
     "\"e_eh_aqui\"",
-    "\"tpk\"",
+    "\"fim_de_turno\"",
+    "\"rola_um_dado_ai\"",
+    "\"acerta\"",
+    "\"erra\"",
+    "\"long_rest\"",
+    "\"iniciativa\"",
+    "\"sua_vez\"",
+    "\"vez_do_monstro\"",
     "\"forca\"",
     "\"destreza\"",
     "\"inteligencia\"",
     "\"sabedoria\"",
-    "\"rola_um_dado_ai\"",
+    "\"recebe\"",
+    "\"buff\"",
+    "\"debuff\"",
+    "\"crit\"",
+    "\"partilha\"",
+    "\"==\"",
+    "\"!=\"",
+    "\">\"",
+    "\">=\"",
+    "\"<\"",
+    "\"<=\"",
+    "\"&&\"",
+    "\"||\"",
+    "\"!\"",
+    "<INT_LIT>",
+    "<FLOAT_LIT>",
+    "<BOOL_LIT>",
+    "<CHAR_LIT>",
+    "<IDENT>",
+    "<LETTER>",
+    "<DIGIT>",
+    "\",\"",
     "\"(\"",
     "\")\"",
-    "<OPREL>",
-    "<OPBOOL>",
-    "\"=\"",
-    "\"iniciativa\"",
-    "\"sua_vez\"",
-    "\"vez_do_monstro\"",
-    "<OPAD>",
-    "<OPMULT>",
-    "<LETRA>",
-    "<DIGITO>",
-    "<IDENTIFICADOR>",
   };
 
 }
