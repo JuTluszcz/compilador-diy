@@ -17,7 +17,7 @@ public class DungeonCompilador {
     try {
       System.out.println("Iniciando uma nova historia!");
       DungeonCompilador p = new DungeonCompilador(System.in);
-      p.programa();                     // 1 compilação
+      p.programa();                     // 1 compilacao
     } 
     catch (ParseException e)
     {
@@ -91,9 +91,14 @@ TOKEN :
 void programa() :
 {}
 {
-  <INICIAPROG> <IDENT> <ABREBLOCO>
-      bloco()
-  <FECHABLOCO> <FIMINST> 
+  try {
+    <INICIAPROG> <IDENT> <ABREBLOCO>
+        bloco()
+    <FECHABLOCO> <FIMINST>
+  } catch (ParseException e) {
+    System.out.println("Erro sintático em programa(): " + e.getMessage());
+    skipUntil(FIMINST);
+  } 
   //<EOF>
 }
 
@@ -101,22 +106,44 @@ void programa() :
 void bloco() :
 {}
 {
-  ( declaraVariavel() | comando() )*
+  (
+    try {
+      declaraVariavel() | comando()
+    } catch (ParseException e) {
+      System.out.println("Erro sintático em bloco(): " + e.getMessage());
+      skipUntil(FIMINST, FECHABLOCO);
+    }
+  )*
 }
 
 void declaraVariavel() : {}
  {
-   tipo() listaDeclaracoes() <FIMINST>
+   try {
+     tipo() listaDeclaracoes() <FIMINST>
+   } catch (ParseException e) {
+     System.out.println("Erro sintático em declaraVariavel(): " + e.getMessage());
+     skipUntil(FIMINST);
+   }
  }
  
  void listaDeclaracoes() : {}
  {
-   declaracao() ( "," declaracao() )*
+   try {
+     declaracao() ( "," declaracao() )*
+   } catch (ParseException e) {
+     System.out.println("Erro sintático em listaDeclaracoes(): " + e.getMessage());
+     skipUntil(FIMINST);
+   }
  }
 
  void declaracao() : {}
  {
-   <IDENT> ( <ASSIGN> expressao() )?
+   try {
+     <IDENT> ( <ASSIGN> expressao() )?
+   } catch (ParseException e) {
+     System.out.println("Erro sintático em declaracao(): " + e.getMessage());
+     skipUntil(FIMINST);
+   }
  }
  
 /* tipo : forca | destreza | inteligencia | sabedoria */
@@ -140,28 +167,48 @@ void comando() :
 void atribuicao() :
 {}
 {
-  <IDENT> <ASSIGN> expressao() <FIMINST>
+  try {
+    <IDENT> <ASSIGN> expressao() <FIMINST>
+  } catch (ParseException e) {
+    System.out.println("Erro sintático em atribuicao(): " + e.getMessage());
+    skipUntil(FIMINST);
+  }
 }
 
 /* if : if (expr) entao bloco [se_nao bloco] fim */
 void condicional() :
 {}
 {
-  <IF> expressao() <THEN> bloco() ( <ELSE> bloco() )? <END>
+  try {
+    <IF> expressao() <THEN> bloco() ( <ELSE> bloco() )? <END>
+  } catch (ParseException e) {
+    System.out.println("Erro sintático em condicional(): " + e.getMessage());
+    skipUntil(END);
+  }
 }
 
 /* while : iniciativa (expr) sua_vez bloco fim */
 void lacoWhile() :
 {}
 {
-  <WHILE> expressao() <DO> bloco() <END>
+  try {
+    <WHILE> expressao() <DO> bloco() <END>
+  } catch (ParseException e) {
+    System.out.println("Erro sintático em lacoWhile(): " + e.getMessage());
+    skipUntil(END);
+  }
 }
 
 /* do-until : sua_vez bloco vez_do_monstro (expr) fim_de_turno   */
 void lacoDoUntil() :
 {}
 {
-  <DO> bloco() <UNTIL> expressao() <FIMINST>
+  try {
+    <DO> bloco() <UNTIL> expressao() <FIMINST>
+  } catch (ParseException e) {
+    System.out.println("Erro sintático em lacoDoUntil(): " + e.getMessage());
+    skipUntil(FIMINST);
+  }
 }
 
 /* ---------------- EXPRESSÕES ---------------- */
@@ -205,4 +252,21 @@ void literal() : {} {
     | <FLOAT_LIT>
     | <BOOL_LIT>
     | <CHAR_LIT>
+}
+
+/* ---------------- SINCRONIZAÇÃO POR PÂNICO ---------------- */
+void skipUntil(int... tokens) :
+{}
+{
+  {
+    Token t;
+    outer:
+    while (true) {
+      t = getNextToken();
+      for (int tok : tokens) {
+        if (t.kind == tok) break outer;
+      }
+      if (t.kind == 0) break; // EOF
+    }
+  }
 }
