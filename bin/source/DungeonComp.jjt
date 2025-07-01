@@ -1,0 +1,187 @@
+/**
+ * Compilador D&D - Versão Definitiva
+ * Gramática completa com anotações do JJTree, recuperação de erros (modo pânico),
+ * verificação de argumentos e nós explícitos para identificadores e literais.
+ */
+
+options {
+  STATIC = false;
+  LOOKAHEAD = 1;
+  MULTI = true;
+  NODE_DEFAULT_VOID = true;
+  VISITOR = true;
+}
+
+PARSER_BEGIN(DungeonCompilador)
+package source;
+
+import java.io.*;
+
+public class DungeonCompilador {
+  
+  public static void main(String[] args) {
+    if (args.length == 0) {
+      System.err.println("Erro: O Mestre precisa de um pergaminho para narrar!");
+      System.err.println("Uso: java source.DungeonCompilador <nome_do_arquivo>");
+      return;
+    }
+
+    System.out.println("O Mestre se prepara para narrar a aventura...");
+    String nomeDoArquivo = args[0];
+    
+    try {
+      FileInputStream fis = new FileInputStream(nomeDoArquivo);
+      DungeonCompilador parser = new DungeonCompilador(fis);
+      SimpleNode root = parser.programa();
+      
+      System.out.println("\nA campanha foi compilada com sucesso!");
+      System.out.println("--- Visualizacao da Arvore Sintatica (AST) ---");
+      root.dump(" ");
+      
+    } catch (FileNotFoundException e) {
+        System.err.println("Erro: O Mestre nao encontrou o pergaminho da campanha: " + nomeDoArquivo);
+    } catch (ParseException e) {
+      System.err.println("A aventura termina abruptamente por um erro fatal: " + e.getMessage());
+    } catch (TokenMgrError e){
+        System.err.println("Voce tomou dano lexico! Um simbolo arcano nao foi reconhecido: " + e.getMessage());
+    }
+  }
+}
+PARSER_END(DungeonCompilador)
+
+/* ================================================================== */
+/* LÉXICO (Tokens)                                                    */
+/* ================================================================== */
+
+SKIP : { " " | "\t" | "\r" | "\n" }
+
+TOKEN :
+{
+      < INICIAPROG   : "campanha" >
+  |   < ABREBLOCO    : "mesa" >
+  |   < FECHABLOCO   : "e_eh_aqui" >
+  |   < FIMINST      : "fim_de_turno" >
+
+  |   < IF           : "rola_um_dado_ai" >
+  |   < THEN         : "acerta" >
+  |   < ELSE         : "erra" >
+  |   < END          : "long_rest" >
+
+  |   < WHILE        : "iniciativa" >
+  |   < DO           : "sua_vez" >
+  |   < UNTIL        : "vez_do_monstro" >
+
+  |   < TIPOINT      : "forca" >
+  |   < TIPOFLOAT    : "destreza" >
+  |   < TIPOBOL      : "inteligencia" >
+  |   < TIPOCHAR     : "sabedoria" >
+
+  |   < ASSIGN       : "recebe" >
+  |   < PLUS         : "buff" >  |   < MINUS  : "debuff" >
+  |   < TIMES        : "crit" >  |   < DIV    : "partilha" >
+
+  |   < EQ : "==" > | < NE : "!=" > | < GT : ">" > | < GE : ">=" >
+  |   < LT : "<" >  | < LE : "<=" >
+
+  |   < ANDBOOL : "&&" > | < ORBOOL : "||" > | < NOTBOOL : "!" >
+
+  |   < INT_LIT   : (["0"-"9"])+ >
+  |   < FLOAT_LIT : (["0"-"9"])+ "." (["0"-"9"])+ >
+  |   < BOOL_LIT  : "verdadeiro" | "falso" >
+  |   < CHAR_LIT  : "'" (~["'"])* "'" >
+
+  |   <IDENT   : <LETTER> (<LETTER> | <DIGIT>)* >
+  |   <#LETTER : ["a"-"z","A"-"Z","_"] >
+  |   <#DIGIT  : ["0"-"9"] >
+}
+
+/* ================================================================== */
+/* SINTAXE (Gramática com correções na árvore)                        */
+/* ================================================================== */
+
+SimpleNode programa() #Programa(1) : {}
+{
+  <INICIAPROG> <IDENT> <ABREBLOCO> bloco() <FECHABLOCO> <FIMINST> <EOF>
+  { return jjtThis; }
+}
+
+void bloco() #Bloco : {}
+{
+  (
+    try {
+      declaracao() | comando()
+    } 
+    catch (ParseException e) {
+      System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+      Token t;
+      do {
+        t = getNextToken();
+      } while (t.kind != FIMINST && t.kind != FECHABLOCO && t.kind != EOF);
+    }
+  )*
+}
+
+void declaracao() #Declaracao : {}
+{
+  tipo() id() ( <ASSIGN> expressao() )? <FIMINST>
+}
+
+void tipo() #Tipo : {}
+{
+  <TIPOINT> | <TIPOFLOAT> | <TIPOBOL> | <TIPOCHAR>
+}
+
+void comando() #void : {}
+{
+    atribuicao()
+  | condicional()
+  | lacoWhile()
+  | lacoDoUntil()
+}
+
+void atribuicao() #Atribuicao : {}
+{
+  id() <ASSIGN> expressao() <FIMINST>
+}
+
+void condicional() #Condicional : {}
+{
+  <IF> expressao() <THEN> bloco() ( <ELSE> bloco() )? <END>
+}
+
+void lacoWhile() #While : {}
+{
+  <WHILE> expressao() <DO> bloco() <END>
+}
+
+void lacoDoUntil() #DoUntil : {}
+{
+  <DO> bloco() <UNTIL> expressao() <FIMINST>
+}
+
+/* --- Expressões --- */
+
+void expressao() #Or : {} { expAND() ( <ORBOOL> expAND() )* }
+void expAND() #And : {} { expRel() ( <ANDBOOL> expRel() )* }
+void expRel() #Rel : {} { expAditiva() ( (<EQ>|<NE>|<GT>|<GE>|<LT>|<LE>) expAditiva() )? }
+void expAditiva() #Add : {} { expMult() ( (<PLUS>|<MINUS>) expMult() )* }
+void expMult() #Mult : {} { fator() ( (<TIMES>|<DIV>) fator() )* }
+
+void fator() #void : {} {
+      id()
+    | literal()
+    | <NOTBOOL> fator() #Not
+    | "(" expressao() ")"
+}
+
+void id() #Id : {}
+{
+  <IDENT>
+}
+
+void literal() #void : {} {
+      <INT_LIT> #IntLiteral
+    | <FLOAT_LIT> #FloatLiteral
+    | <BOOL_LIT> #BoolLiteral
+    | <CHAR_LIT> #CharLiteral
+}
