@@ -1,0 +1,305 @@
+/**
+ * Compilador D&D - Versão Definitiva
+ * Gramática completa com anotações do JJTree, recuperação de erros (modo pânico),
+ * verificação de argumentos e nós explícitos para identificadores e literais.
+ */
+
+options {
+  STATIC = false;
+  LOOKAHEAD = 1;
+  MULTI = true;
+  NODE_DEFAULT_VOID = true;
+  VISITOR = true;
+}
+
+PARSER_BEGIN(DungeonCompilador)
+package source;
+import recovery.*;
+import view.Tela;
+import java.io.*;
+
+public class DungeonCompilador {
+  final static Tela window = new Tela();
+
+  public static void main(String[] args) 
+  {
+    //Inicia a tela
+		window.setVisible(true);
+		
+		window.getCompilar().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+	  		window.setVazioConsoleMsg();
+
+				if((window.getTextArquivo().getText().equals(window.getCampoTexto())) != true)
+        {
+          window.setControleArquivo(false);
+        }
+
+
+        if(window.getControleArquivo() || window.getTextArquivo().getText().equals(" ") )
+        {
+					inicia();
+		   	} else
+				{
+					if(window.getTextArquivo().getText().equals(""))
+	        {
+	          JOptionPane.showMessageDialog (null, "Arquivo vazio", "Arquivo", JOptionPane.WARNING_MESSAGE);
+	        } else
+          {
+	          int resp = JOptionPane.showConfirmDialog(null, "Salvar altera\u00e7\u00f5es?");
+            if(resp == 0)
+            {
+              //Salvar um novo arquivo se ele n existir
+              if(window.getFile() == null)
+              {
+                window.salvarComo();
+                inicia();
+              }else //Se o arquivo ja existir salvar nele
+              {
+                window.salvar();
+                inicia();
+              }
+            }
+          }
+				}
+		  }
+  	});
+  }
+
+  /**
+  * Pula tokens até encontrar um da RecoverySet ou EOF.
+  */
+  private void skip(RecoverySet rs) {
+      Token t = getToken(1);                       // olha o próximo
+      while (!rs.contains(t.kind) && t.kind != DungeonCompiladorConstants.EOF) {
+        getNextToken();                          // descarta
+        t = getToken(1);
+      }
+  }
+}
+PARSER_END(DungeonCompilador)
+
+
+/* ================================================================== */
+/* LÉXICO (Tokens)                                                    */
+/* ================================================================== */
+
+SKIP : { " " | "\t" | "\r" | "\n" }
+
+TOKEN :
+{
+      < INICIAPROG   : "campanha" >
+  |   < ABREBLOCO    : "mesa" >
+  |   < FECHABLOCO   : "e_eh_aqui" >
+  |   < FIMINST      : "fim_de_turno" >
+
+  |   < IF           : "rola_um_dado_ai" >
+  |   < THEN         : "acerta" >
+  |   < ELSE         : "erra" >
+  |   < END          : "long_rest" >
+
+  |   < WHILE        : "iniciativa" >
+  |   < DO           : "sua_vez" >
+  |   < UNTIL        : "vez_do_monstro" >
+
+  |   < TIPOINT      : "forca" >
+  |   < TIPOFLOAT    : "destreza" >
+  |   < TIPOBOL      : "inteligencia" >
+  |   < TIPOCHAR     : "sabedoria" >
+
+  |   < ASSIGN       : "recebe" >
+  |   < PLUS         : "buff" >  |   < MINUS  : "debuff" >
+  |   < TIMES        : "crit" >  |   < DIV    : "partilha" >
+
+  |   < EQ : "==" > | < NE : "!=" > | < GT : ">" > | < GE : ">=" >
+  |   < LT : "<" >  | < LE : "<=" >
+
+  |   < ANDBOOL : "&&" > | < ORBOOL : "||" > | < NOTBOOL : "!" >
+
+  |   < INT_LIT   : (["0"-"9"])+ >
+  |   < FLOAT_LIT : (["0"-"9"])+ "." (["0"-"9"])+ >
+  |   < BOOL_LIT  : "verdadeiro" | "falso" >
+  |   < CHAR_LIT  : "'" (~["'"])* "'" >
+
+  |   <IDENT   : <LETTER> (<LETTER> | <DIGIT>)* >
+  |   <#LETTER : ["a"-"z","A"-"Z","_"] >
+  |   <#DIGIT  : ["0"-"9"] >
+}
+
+/* ================================================================== */
+/* SINTAXE (Gramática com correções na árvore)                        */
+/* ================================================================== */
+
+SimpleNode programa() #Programa(1) : {}
+{
+  <INICIAPROG> <IDENT> <ABREBLOCO> bloco() <FECHABLOCO> <FIMINST> <EOF>
+  { return jjtThis; }
+}
+
+void bloco() #Bloco : {}
+{
+  (
+    try {
+      declaracao() | comando()
+    } 
+    catch (ParseException e) {
+      System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+      skip(Follow.bloco);
+    }
+  )*
+}
+
+void declaracao() #Declaracao : {}
+{
+	try {
+    tipo() id() ( <ASSIGN> expressao() )? <FIMINST>
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.declaracao);
+	}
+}
+
+void tipo() #Tipo : {}
+{
+  try {
+    <TIPOINT> | <TIPOFLOAT> | <TIPOBOL> | <TIPOCHAR>
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.tipo);
+	}
+}
+
+void comando() #void : {}
+{
+  try {
+    atribuicao()
+    | condicional()
+    | lacoWhile()
+    | lacoDoUntil()
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.comando);
+	}
+}
+
+void atribuicao() #Atribuicao : {}
+{
+	try {
+    id() <ASSIGN> expressao() <FIMINST>
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.atribuicao);
+	}
+}
+
+void condicional() #Condicional : {}
+{
+	try {
+    <IF> expressao() <THEN> bloco() ( <ELSE> bloco() )? <END>
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.condicional);
+	}
+}
+
+void lacoWhile() #While : {}
+{
+	try {
+    <WHILE> expressao() <DO> bloco() <END>
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.lacoWhile);
+	}
+}
+
+void lacoDoUntil() #DoUntil : {}
+{
+	try {
+    <DO> bloco() <UNTIL> expressao() <FIMINST>
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.lacoDoUntil);
+	}
+}
+
+/* --- Expressões --- */
+
+void expressao() #Or : {}
+{
+  try {
+    expAND() ( <ORBOOL> expAND() )*
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.expressao);
+	}
+}
+
+
+void expAND() #And : {}
+{
+	try {
+    expRel() ( <ANDBOOL> expRel() )*
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.expAND);
+	}
+}
+
+
+void expRel() #Rel : {}
+{
+	try {
+    expAditiva() ( (<EQ>|<NE>|<GT>|<GE>|<LT>|<LE>) expAditiva() )?
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.expRel);
+	}
+}
+
+
+void expAditiva() #Add : {}
+{
+	try {
+    expMult() ( (<PLUS>|<MINUS>) expMult() )*
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.expAditiva);
+	}
+}
+
+
+void expMult() #Mult : {}
+{
+	try {
+    fator() ( (<TIMES>|<DIV>) fator() )*
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.expMult);
+	}
+}
+
+
+void fator() #void : {} {
+	try {
+    id()
+    | literal()
+    | <NOTBOOL> fator() #Not
+    | "(" expressao() ")"
+	} catch (ParseException e) {
+    System.err.println(">> Voce se atrapalha na acao! (Erro: " + e.getMessage() + ")");
+    skip(Follow.fator);
+	}
+}
+
+void id() #Id : {}
+{
+  <IDENT>
+}
+
+void literal() #void : {} {
+      <INT_LIT> #IntLiteral
+    | <FLOAT_LIT> #FloatLiteral
+    | <BOOL_LIT> #BoolLiteral
+    | <CHAR_LIT> #CharLiteral
+}
