@@ -87,7 +87,7 @@ public class Tela extends JFrame {
         btnNovoL = new btnNovoListener();
         btnAbrirL = new btnAbrirListener();
 
-        setTitle("Don Quixote");
+        setTitle("Compilador de Dungeons");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 618);
 
@@ -96,7 +96,7 @@ public class Tela extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon background = new ImageIcon(getClass().getResource("/resources/fundo.png"));
+                ImageIcon background = new ImageIcon(getClass().getResource("/resources/fundo.jpeg"));
                 // Desenha a imagem de fundo redimensionada
                 g.drawImage(background.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
@@ -105,7 +105,7 @@ public class Tela extends JFrame {
 
         // ========= MENU =========
         menuBar = new JMenuBar();
-        menuBar.setBackground(Color.LIGHT_GRAY);
+        menuBar.setBackground(Color.DARK_GRAY);
         setJMenuBar(menuBar);
 
         mnFile = new JMenu("Arquivo");
@@ -141,14 +141,14 @@ public class Tela extends JFrame {
 
         // ========= PAINEL SUPERIOR (Toolbar) =========
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topPanel.setBackground(Color.LIGHT_GRAY);
+        topPanel.setBackground(Color.DARK_GRAY);
 
-        btnNovo = new JButton(new ImageIcon(getClass().getResource("/resources/file.gif")));
+        btnNovo = new JButton(new ImageIcon(getClass().getResource("/resources/file.jpeg")));
         btnNovo.addActionListener(btnNovoL);
         btnNovo.setBackground(SystemColor.activeCaptionBorder);
         topPanel.add(btnNovo);
 
-        btnAbrirArquivo = new JButton(new ImageIcon(getClass().getResource("/resources/directory.gif")));
+        btnAbrirArquivo = new JButton(new ImageIcon(getClass().getResource("/resources/grimore.jpeg")));
         btnAbrirArquivo.setBackground(Color.LIGHT_GRAY);
         btnAbrirArquivo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -188,7 +188,7 @@ public class Tela extends JFrame {
         });
         topPanel.add(btnAbrirArquivo);
 
-        JButton btnSalvar = new JButton(new ImageIcon(getClass().getResource("/resources/floppy.gif")));
+        JButton btnSalvar = new JButton(new ImageIcon(getClass().getResource("/resources/salvar.jpeg")));
         btnSalvar.setBackground(SystemColor.activeCaptionBorder);
         btnSalvar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -197,7 +197,7 @@ public class Tela extends JFrame {
         });
         topPanel.add(btnSalvar);
 
-        btnSalvarComo = new JButton(new ImageIcon(getClass().getResource("/resources/hardDrive.gif")));
+        btnSalvarComo = new JButton(new ImageIcon(getClass().getResource("/resources/salvarComo.jpeg")));
         btnSalvarComo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 salvarComo();
@@ -205,8 +205,8 @@ public class Tela extends JFrame {
         });
         topPanel.add(btnSalvarComo);
 
-        btnCompilador = new JButton(new ImageIcon(getClass().getResource("/resources/run.png")));
-        btnCompilador.setBackground(Color.LIGHT_GRAY);
+        btnCompilador = new JButton(new ImageIcon(getClass().getResource("/resources/executar.jpeg")));
+        btnCompilador.setBackground(Color.GREEN);
         topPanel.add(btnCompilador);
 
         // Opcional: definir tamanho preferencial para o topPanel
@@ -548,11 +548,6 @@ public class Tela extends JFrame {
         StyleConstants.setForeground(structureStyle, Color.BLUE);
         StyleConstants.setItalic(structureStyle, true);
         styles.put("structure", structureStyle);
-
-        Style aguaStyle = doc.addStyle("agua", null);
-        StyleConstants.setForeground(aguaStyle, Color.GREEN);
-        StyleConstants.setItalic(aguaStyle, true);
-        styles.put("agua", aguaStyle);
     }
 
     // Realiza o parsing do documento para aplicar os estilos (ex.: sintaxe)
@@ -564,7 +559,7 @@ public class Tela extends JFrame {
                     String text = doc.getText(0, doc.getLength());
 
                     // Padrões para palavras-chave e strings
-                    String[] keywords = {"Number", "Truth", "Stream", "true", "false"};
+                    String[] keywords = {"forca", "destreza", "inteligencia", "sabedoria"};
                     String stringPattern = "\"([^\"\\\\]|\\\\.)*\"";
 
                     // Aplica estilo para strings (lembre-se de criar o estilo "string", se desejar)
@@ -575,14 +570,11 @@ public class Tela extends JFrame {
                         applyStyle("\\b" + keyword + "\\b", "keyword");
                     }
 
-                    String mainPattern = "Sancho, I have conceived an idea most ingenious";
+                    String mainPattern = "campanha";
                     applyStyle(mainPattern, "main");
 
-                    String structurePattern = "\\b(Should the valiant knight|Otherwise, I beseech thee|Or if fortune so favors|Perchance we shall repeat|Whilst this truth doth hold)\\b";
+                    String structurePattern = "\\b(rola_um_dado_ai|acerta|erra|long_rest|iniciativa|sua_vez|vez_do_monstro)\\b";
                     applyStyle(structurePattern, "structure");
-
-                    String aguaPattern = "\\b(Bestow upon me a|I shall declare upon thee a)\\b";
-                    applyStyle(aguaPattern, "agua");
 
                 } catch (BadLocationException ex) {
                     ex.printStackTrace();

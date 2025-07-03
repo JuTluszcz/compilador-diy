@@ -1,6 +1,6 @@
 package recovery;
 
-import parser.*;
+import source.*;
 
 import java.util.*;
 
@@ -57,7 +57,7 @@ public class RecoverySet extends HashSet {
 
         while (it.hasNext()) {
             k = ((Integer) it.next()).intValue();
-            s += (DonQuixoteLanguage.im(k) + " ");
+            s += (DungeonCompilador.im(k) + " ");
         }
 
         return s;

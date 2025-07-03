@@ -18,6 +18,19 @@ import recovery.*;
 import view.Tela;
 import java.io.*;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import javax.swing.JOptionPane;
+import java.io.FileWriter;
+import controleArquivo.CreateFile;
+import java.io.FileWriter;
+import javax.swing.JFileChooser;
+
 public class DungeonCompilador {
   final static Tela window = new Tela();
 
@@ -66,6 +79,46 @@ public class DungeonCompilador {
 		  }
   	});
   }
+
+  // dentro da mesma classe onde existe o campo estático "window"
+  private static void inicia() {
+      // 1. Lê o texto do editor ------------------------------------------------
+      String codigo = window.getTextArquivo().getText();
+
+      // 2. Limpa áreas de saída -------------------------------------------------
+      window.setVazioConsoleMsg();          // já zera console e msg
+
+      try {
+          // 3. Cria um novo parser a cada execução -----------------------------
+          java.io.ByteArrayInputStream bis =
+              new java.io.ByteArrayInputStream(
+                  codigo.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+          DungeonCompilador parser = new DungeonCompilador(bis);
+
+          // 4. Chama o símbolo inicial da gramática ----------------------------
+          SimpleNode root = parser.programa();     // <<--- é "programa()", não Start()
+
+          // 5. Mostra AST no painel direito ------------------------------------
+          window.setMsg("");                       // limpa "Árvore Sintática"
+          dumpAst(root, "");                       // imprime recursivamente
+
+          // 6. Sucesso no console ----------------------------------------------
+          window.setConsole("Compilado com sucesso!\n");
+
+      } catch (Exception ex) {
+          window.setConsole("Erro: " + ex.getMessage() + "\n");
+      }
+  }
+
+  /* Percorre a AST e escreve em textMsg */
+  private static void dumpAst(SimpleNode n, String indent) {
+      window.setMsg(indent + n.toString() + "\n");
+      for (int i = 0; i < n.jjtGetNumChildren(); i++) {
+          dumpAst((SimpleNode) n.jjtGetChild(i), indent + "  ");
+      }
+  }
+
 
   /**
   * Pula tokens até encontrar um da RecoverySet ou EOF.
